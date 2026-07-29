@@ -1,5 +1,5 @@
-// assets/script.js
-// Interactions: mobile nav, testimonials, year, Leaflet map, and lightweight three.js hero animation
+// assets/script.js (updated)
+// Improved hero initialization: robust three.js setup with sizing fixes and a 2D/canvas fallback when WebGL is unavailable.
 
 document.addEventListener('DOMContentLoaded', function(){
   // Year
@@ -40,55 +40,155 @@ document.addEventListener('DOMContentLoaded', function(){
     }
   }catch(e){console.warn('Leaflet init failed',e)}
 
-  // Lightweight three.js hero background (particles)
-  try{
-    if(typeof THREE !== 'undefined'){
-      var canvas = document.getElementById('heroCanvas');
-      var width = canvas.clientWidth || window.innerWidth;
-      var height = 400;
-      canvas.width = width * devicePixelRatio;
-      canvas.height = height * devicePixelRatio;
-      canvas.style.width = '100%';
-      canvas.style.height = height + 'px';
+  // HERO: three.js particles with robust sizing and fallback
+  (function initHero(){
+    var wrap = document.getElementById('heroCanvasWrap');
+    var canvas = document.getElementById('heroCanvas');
+    if(!wrap || !canvas) return;
 
-      var renderer = new THREE.WebGLRenderer({canvas: canvas, alpha:true});
-      renderer.setSize(width, height);
-      renderer.setPixelRatio(window.devicePixelRatio || 1);
+    // Ensure visible height on load
+    if(!wrap.style.height) wrap.style.height = '400px';
 
-      var scene = new THREE.Scene();
-      var camera = new THREE.PerspectiveCamera(60, width / height, 1, 1000);
-      camera.position.z = 200;
+    var dpr = window.devicePixelRatio || 1;
 
-      // particles
-      var geometry = new THREE.BufferGeometry();
-      var count = 400;
-      var positions = new Float32Array(count * 3);
-      for(var i=0;i<count;i++){
-        positions[i*3+0] = (Math.random() - 0.5) * 800;
-        positions[i*3+1] = (Math.random() - 0.5) * 400;
-        positions[i*3+2] = (Math.random() - 0.5) * 800;
+    // Helper to size canvas and renderer
+    function sizeCanvas(renderer){
+      var w = Math.max(300, wrap.clientWidth || window.innerWidth);
+      var h = Math.max(240, parseInt(window.getComputedStyle(wrap).height,10) || 400);
+      canvas.width = Math.floor(w * dpr);
+      canvas.height = Math.floor(h * dpr);
+      canvas.style.width = w + 'px';
+      canvas.style.height = h + 'px';
+      if(renderer && renderer.setSize) renderer.setSize(w, h, false);
+    }
+
+    // Check for three.js and WebGL support
+    var hasThree = (typeof THREE !== 'undefined');
+    var webglAvailable = (function(){
+      try{
+        var test = canvas.getContext('webgl') || canvas.getContext('experimental-webgl');
+        return !!test;
+      }catch(e){ return false; }
+    })();
+
+    if(hasThree && webglAvailable){
+      try{
+        var width = Math.max(300, wrap.clientWidth || window.innerWidth);
+        var height = Math.max(240, parseInt(window.getComputedStyle(wrap).height,10) || 400);
+
+        var renderer = new THREE.WebGLRenderer({canvas: canvas, alpha:true, antialias:true});
+        renderer.setPixelRatio(dpr);
+        renderer.setSize(width, height);
+
+        var scene = new THREE.Scene();
+        var camera = new THREE.PerspectiveCamera(60, width/height, 1, 2000);
+        camera.position.z = 200;
+
+        // create particle cloud
+        var geometry = new THREE.BufferGeometry();
+        var count = 600;
+        var positions = new Float32Array(count * 3);
+        for(var i=0;i<count;i++){
+          positions[i*3+0] = (Math.random() - 0.5) * 900;
+          positions[i*3+1] = (Math.random() - 0.5) * 400;
+          positions[i*3+2] = (Math.random() - 0.5) * 900;
+        }
+        geometry.setAttribute('position', new THREE.BufferAttribute(positions, 3));
+        var material = new THREE.PointsMaterial({color:0x0a8f7a, size:3 * dpr, opacity:0.9});
+        var points = new THREE.Points(geometry, material);
+        scene.add(points);
+
+        // lighting subtle
+        var light = new THREE.DirectionalLight(0xffffff, 0.4);
+        light.position.set(0,1,1);
+        scene.add(light);
+
+        function animate(){
+          requestAnimationFrame(animate);
+          points.rotation.y += 0.0018;
+          points.rotation.x += 0.0009;
+          renderer.render(scene, camera);
+        }
+        sizeCanvas(renderer);
+        animate();
+
+        window.addEventListener('resize', function(){ sizeCanvas(renderer); camera.aspect = wrap.clientWidth / parseInt(window.getComputedStyle(wrap).height,10); camera.updateProjectionMatrix(); });
+
+        // bring content above canvas
+        canvas.style.zIndex = 0;
+        var contentNodes = wrap.querySelectorAll('.hero-copy, .hero-media');
+        contentNodes.forEach(function(n){ n.style.position = 'relative'; n.style.zIndex = 2; });
+
+        return;
+      }catch(err){
+        console.warn('three.js init failed', err);
+        // fall through to fallback
       }
-      geometry.setAttribute('position', new THREE.BufferAttribute(positions, 3));
-      var material = new THREE.PointsMaterial({color:0x0a8f7a, size:3 * (window.devicePixelRatio||1), opacity:0.85});
-      var points = new THREE.Points(geometry, material);
-      scene.add(points);
+    }
 
-      function animate(){
-        requestAnimationFrame(animate);
-        points.rotation.y += 0.0015;
-        points.rotation.x += 0.0007;
-        renderer.render(scene, camera);
+    // Fallback: simple animated 2D canvas particles (works without WebGL)
+    try{
+      // Clear any existing canvas drawing
+      var ctx = canvas.getContext('2d');
+      if(!ctx){
+        wrap.classList.add('hero-fallback');
+        return;
       }
-      animate();
+
+      var w = Math.max(300, wrap.clientWidth || window.innerWidth);
+      var h = Math.max(240, parseInt(window.getComputedStyle(wrap).height,10) || 400);
+      canvas.width = Math.floor(w * dpr);
+      canvas.height = Math.floor(h * dpr);
+      canvas.style.width = w + 'px';
+      canvas.style.height = h + 'px';
+      ctx.scale(dpr, dpr);
+
+      var particles = [];
+      var pCount = 120;
+      for(var i=0;i<pCount;i++){
+        particles.push({
+          x: Math.random() * w,
+          y: Math.random() * h,
+          vx: (Math.random() - 0.5) * 0.6,
+          vy: (Math.random() - 0.5) * 0.6,
+          r: 1 + Math.random() * 3
+        });
+      }
+
+      function draw(){
+        ctx.clearRect(0,0,w,h);
+        ctx.fillStyle = 'rgba(10,143,122,0.9)';
+        for(var i=0;i<pCount;i++){
+          var p = particles[i];
+          p.x += p.vx; p.y += p.vy;
+          if(p.x < -10) p.x = w+10; if(p.x > w+10) p.x = -10;
+          if(p.y < -10) p.y = h+10; if(p.y > h+10) p.y = -10;
+          ctx.beginPath(); ctx.arc(p.x, p.y, p.r, 0, Math.PI*2); ctx.fill();
+        }
+        requestAnimationFrame(draw);
+      }
+      draw();
+
+      canvas.style.zIndex = 0;
+      var contentNodes = wrap.querySelectorAll('.hero-copy, .hero-media');
+      contentNodes.forEach(function(n){ n.style.position = 'relative'; n.style.zIndex = 2; });
 
       window.addEventListener('resize', function(){
-        var w = canvas.clientWidth || window.innerWidth;
-        var h = 400;
-        renderer.setSize(w, h);
-        camera.aspect = w / h;
-        camera.updateProjectionMatrix();
+        w = Math.max(300, wrap.clientWidth || window.innerWidth);
+        h = Math.max(240, parseInt(window.getComputedStyle(wrap).height,10) || 400);
+        canvas.width = Math.floor(w * dpr);
+        canvas.height = Math.floor(h * dpr);
+        canvas.style.width = w + 'px';
+        canvas.style.height = h + 'px';
+        ctx.setTransform(dpr,0,0,dpr,0,0);
       });
+
+    }catch(e){
+      // Last fallback: CSS animated gradient
+      wrap.classList.add('hero-fallback');
+      console.warn('hero fallback used', e);
     }
-  }catch(e){console.warn('three.js init failed',e)}
+
+  })();
 
 });
