@@ -1,4 +1,4 @@
-/* assets/styles.css - updated for hero 3D canvas & services page */
+/* assets/styles.css - updated fixes to ensure hero canvas is visible and fallback coloring */
 :root{
   --bg:#f7fbfb;
   --card:#ffffff;
@@ -27,8 +27,8 @@ body{
 .primary-cta{display:inline-block;background:var(--accent);color:white;padding:0.75rem 1.05rem;border-radius:10px;text-decoration:none;font-weight:600;box-shadow:0 6px 18px rgba(10,143,122,0.12);}
 .section{padding:3rem 0}
 .hero{padding:0}
-.hero-canvas-wrap{position:relative;overflow:hidden}
-#heroCanvas{position:absolute;left:0;top:0;width:100%;height:400px;display:block}
+.hero-canvas-wrap{position:relative;overflow:hidden;min-height:360px}
+#heroCanvas{position:absolute;left:0;top:0;width:100%;height:100%;display:block;pointer-events:none;background:linear-gradient(90deg, rgba(10,143,122,0.08), rgba(10,143,122,0.03));}
 .hero .hero-grid{display:grid;grid-template-columns:1fr;gap:1.2rem;align-items:center;padding:2.4rem 1rem}
 .hero h1{font-size:2rem;margin:0 0 0.6rem;color:white;text-shadow:0 6px 20px rgba(0,0,0,0.5)}
 .lead{color:rgba(255,255,255,0.9);margin-bottom:1rem}
@@ -75,3 +75,4 @@ body{
 /* Accessibility and focus */
 a:focus{outline:3px solid rgba(10,143,122,0.15);outline-offset:3px}
 .brand::after{content:" — Pakistan SEO Service";font-weight:600;color:var(--muted);font-size:0.9rem;margin-left:0.5rem}
+.hero-fallback{background:linear-gradient(90deg, rgba(10,143,122,0.06), rgba(10,143,122,0.02));}
