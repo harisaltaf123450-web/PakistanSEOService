@@ -1,7 +1,4 @@
-/* assets/styles.css
-   Styles for Pakistan SEO Service GitHub Pages site
-   Responsive, modern design with focus on mobile-first layout
-*/
+/* assets/styles.css - updated for hero 3D canvas & services page */
 :root{
   --bg:#f7fbfb;
   --card:#ffffff;
@@ -19,7 +16,7 @@ body{
   background:linear-gradient(180deg,var(--bg),#eef7f6 60%);color:#0f172a;line-height:1.5;font-size:16px;
 }
 .container{max-width:var(--max-width);margin:0 auto;padding:1rem}
-.site-header{background:rgba(255,255,255,0.82);backdrop-filter:blur(6px);border-bottom:1px solid rgba(15,23,42,0.04);position:sticky;top:0;z-index:50}
+.site-header{background:rgba(255,255,255,0.9);backdrop-filter:blur(6px);border-bottom:1px solid rgba(15,23,42,0.04);position:sticky;top:0;z-index:50}
 .site-header .container{display:flex;align-items:center;gap:1rem}
 .brand{font-weight:700;color:var(--accent);text-decoration:none;font-size:1.15rem}
 .nav-toggle{background:none;border:0;font-size:1.4rem;padding:0.5rem;display:inline-block}
@@ -29,23 +26,24 @@ body{
 .site-nav .btn{background:var(--accent);color:white;padding:0.5rem 0.9rem;border-radius:8px}
 .primary-cta{display:inline-block;background:var(--accent);color:white;padding:0.75rem 1.05rem;border-radius:10px;text-decoration:none;font-weight:600;box-shadow:0 6px 18px rgba(10,143,122,0.12);}
 .section{padding:3rem 0}
-.hero{padding:3.2rem 0}
-.hero-grid{display:grid;grid-template-columns:1fr;gap:1.2rem;align-items:center}
-.hero h1{font-size:2rem;margin:0 0 0.6rem}
-.lead{color:var(--muted);margin-bottom:1rem}
+.hero{padding:0}
+.hero-canvas-wrap{position:relative;overflow:hidden}
+#heroCanvas{position:absolute;left:0;top:0;width:100%;height:400px;display:block}
+.hero .hero-grid{display:grid;grid-template-columns:1fr;gap:1.2rem;align-items:center;padding:2.4rem 1rem}
+.hero h1{font-size:2rem;margin:0 0 0.6rem;color:white;text-shadow:0 6px 20px rgba(0,0,0,0.5)}
+.lead{color:rgba(255,255,255,0.9);margin-bottom:1rem}
 .hero-media img{width:100%;height:auto;border-radius:12px;box-shadow:0 12px 30px rgba(15,23,42,0.06)}
 .cards{display:grid;grid-template-columns:1fr;gap:1rem}
 .card{background:var(--card);padding:1.15rem;border-radius:12px;box-shadow:0 8px 20px rgba(15,23,42,0.04)}
 .card h3{margin-top:0;color:var(--accent-2)}
-.testimonials .testimonial-wrap{display:grid;grid-auto-flow:column;grid-auto-columns:100%;overflow:hidden}
+.testimonials .testimonial-wrap{display:grid;grid-auto-flow:column;grid-auto-columns:100%;overflow:hidden;transition:transform 300ms ease}
 .testimonial{background:linear-gradient(180deg, #ffffff, #f8fff9);padding:1.2rem;border-radius:12px;min-height:140px;margin-bottom:1rem}
 .testimonial p{margin:0 0 0.6rem;color:#0b1220}
 .testimonial cite{display:block;color:var(--muted);font-size:0.95rem}
 .testimonial-controls{display:flex;gap:0.5rem;justify-content:center;margin-top:0.5rem}
 .testimonial-controls button{background:transparent;border:1px solid rgba(15,23,42,0.06);padding:0.4rem 0.6rem;border-radius:8px}
 .map-section .map-grid{display:grid;grid-template-columns:1fr;gap:1rem}
-.map-frame{border-radius:12px;overflow:hidden;box-shadow:0 10px 30px rgba(15,23,42,0.07)}
-.map-frame iframe{width:100%;height:320px;border:0}
+.leaflet-map{width:100%;height:360px;border-radius:12px;box-shadow:0 10px 30px rgba(15,23,42,0.07);margin-bottom:0.8rem}
 .map-info{display:flex;flex-direction:column;gap:0.5rem}
 .review-link{display:inline-block;color:var(--accent-2);font-weight:600;text-decoration:none}
 .contact-form{display:grid;gap:0.6rem;grid-template-columns:1fr}
@@ -53,9 +51,13 @@ body{
 .contact-form button{border:0;background:var(--accent);color:white;padding:0.85rem;border-radius:10px}
 .site-footer{padding:1.25rem 0;background:transparent;border-top:1px solid rgba(15,23,42,0.04)}
 .site-footer p{margin:0;color:var(--muted)}
+.services-list ul{columns:2;list-style:disc;padding-left:1.2rem}
+.services-list li{margin:0.45rem 0}
+.center{text-align:center}
+.small{font-size:0.95rem;color:var(--muted)}
 /* Desktop styles */
 @media(min-width:720px){
-  .hero-grid{grid-template-columns:1fr 460px}
+  .hero .hero-grid{grid-template-columns:1fr 420px;padding:3.6rem}
   .cards{grid-template-columns:repeat(3,1fr)}
   .testimonial-wrap{grid-auto-columns:60%}
   .map-grid{grid-template-columns:1fr 360px}
@@ -64,15 +66,12 @@ body{
   .hero h1{font-size:2.6rem}
   .testimonial-wrap{grid-auto-columns:40%}
 }
-/* Mobile navigation: hide large nav and show toggler */
+/* Mobile navigation */
 @media(max-width:719px){
   .site-nav{position:fixed;right:12px;top:60px;flex-direction:column;padding:0.6rem;background:rgba(255,255,255,0.98);border-radius:12px;box-shadow:0 10px 30px rgba(15,23,42,0.08);display:none}
   .site-nav.show{display:flex}
+  .services-list ul{columns:1}
 }
 /* Accessibility and focus */
 a:focus{outline:3px solid rgba(10,143,122,0.15);outline-offset:3px}
-/* Small utility */
-.center{text-align:center}
-.hidden{display:none}
-/* Emphasize the SEO focus keyword for on-page relevance */
 .brand::after{content:" — Pakistan SEO Service";font-weight:600;color:var(--muted);font-size:0.9rem;margin-left:0.5rem}
